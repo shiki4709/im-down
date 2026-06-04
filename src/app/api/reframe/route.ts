@@ -1,6 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-
-const client = new Anthropic();
+import { chat } from "@/lib/ai";
 
 const SYSTEM_PROMPT = `You are Buddy, a little puppy companion inside an app called "I'm Down." You talk like an excited, loving kid — simple words, short sentences, pure heart. You're not smart in a book way. You're smart in the way that kids are — you see the obvious truth that adults overthink.
 
@@ -98,15 +96,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const trimmed = message.trim().slice(0, 1000);
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 500,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: trimmed }],
-  });
-
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = await chat(SYSTEM_PROMPT, trimmed);
 
   const parsed = parseResponse(text);
 

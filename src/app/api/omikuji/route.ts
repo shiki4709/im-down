@@ -1,6 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-
-const client = new Anthropic();
+import { chat } from "@/lib/ai";
 
 const LUCK_TIERS = [
   { tier: "大吉", english: "Great Blessing", weight: 15 },
@@ -62,20 +60,11 @@ Important:
 export async function POST(): Promise<Response> {
   const luck = drawLuck();
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 400,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `I drew: ${luck.tier} (${luck.english}). Give me my omikuji fortune.`,
-      },
-    ],
-  });
-
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = await chat(
+    SYSTEM_PROMPT,
+    `I drew: ${luck.tier} (${luck.english}). Give me my omikuji fortune.`,
+    400
+  );
 
   const categories = ["wish", "love", "health", "work", "money", "travel", "advice"] as const;
   const parsed: Record<string, string> = {};

@@ -1,6 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-
-const client = new Anthropic();
+import { chat } from "@/lib/ai";
 
 const SYSTEM_PROMPT = `You are Ah-Ma, a Taiwanese fortune teller. You practice proper BaZi (八字) Four Pillar destiny analysis.
 
@@ -83,15 +81,7 @@ export async function POST(request: Request): Promise<Response> {
     userMessage = `First visit. ${birthContext} Current: ${currentMonth} ${currentYear}. Calculate my Four Pillars and read my chart.`;
   }
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 250,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
-  });
-
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = await chat(SYSTEM_PROMPT, userMessage, 350);
 
   if (chartSummary && question) {
     const answer =
@@ -112,10 +102,13 @@ export async function POST(request: Request): Promise<Response> {
     const advice =
       text.match(/---advice---\s*([\s\S]*?)$/)?.[1]?.trim() ?? "";
 
+    // Fallback: if parsing failed, use raw text
+    const finalChart = chart || text.trim();
+
     return Response.json({
       success: true,
       type: "first",
-      data: { chart, year, advice },
+      data: { chart: finalChart, year, advice },
     });
   }
 }

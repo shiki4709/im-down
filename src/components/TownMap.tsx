@@ -75,6 +75,7 @@ export function TownMap({ onEnterShop }: TownMapProps) {
           ))}
         </div>
       </div>
+
     </main>
   );
 }

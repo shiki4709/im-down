@@ -263,7 +263,7 @@ export function OracleView({ onBack }: OracleViewProps) {
         {/* Chart reading - first time dialogue */}
         {state === "chart-reading" && chartData && !dialogueDone && (
           <SpeechBubble
-            lines={[chartData.chart, chartData.year, chartData.advice]}
+            lines={[chartData.chart, chartData.year, chartData.advice].filter(Boolean)}
             onComplete={() => setDialogueDone(true)}
           />
         )}
@@ -352,26 +352,39 @@ export function OracleView({ onBack }: OracleViewProps) {
               </div>
             )}
 
-            <div className="flex gap-3">
-              <button
-                onClick={onBack}
-                className="flex-1 py-3 rounded-2xl bg-accent-soft/60 text-warm-muted text-sm"
-              >
-                leave shop
-              </button>
-              <button
-                onClick={() => {
-                  setAnswerData(null);
-                  setQuestion("");
-                  setDialogueDone(false);
-                  setState("ask");
-                  setTimeout(() => textareaRef.current?.focus(), 100);
+            {/* Keep asking */}
+            <div className="space-y-3 pt-1">
+              <textarea
+                ref={textareaRef}
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="ask another question..."
+                rows={2}
+                maxLength={500}
+                className="w-full py-3 px-4 rounded-2xl bg-white/70 text-warm-text placeholder:text-warm-muted/40 text-sm leading-relaxed shadow-sm border border-[#8B6B8B]/20"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAskQuestion();
+                  }
                 }}
-                className="flex-1 py-3 rounded-2xl bg-[#8B6B8B]/80 text-white text-sm"
-              >
-                ask another question
-              </button>
+              />
+              {question.trim() && (
+                <button
+                  onClick={handleAskQuestion}
+                  className="w-full py-3 rounded-2xl bg-[#8B6B8B] text-white font-medium text-sm"
+                >
+                  ask Ah-Ma
+                </button>
+              )}
             </div>
+
+            <button
+              onClick={onBack}
+              className="w-full py-2.5 rounded-2xl bg-accent-soft/60 text-warm-muted text-sm"
+            >
+              leave shop
+            </button>
           </div>
         )}
       </div>
